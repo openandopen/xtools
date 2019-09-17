@@ -1,6 +1,7 @@
 ### xtool 提供android 环境下的工具类
 ````
-xtool-net htt网络请求工具类似 Retrofit 
+xtool-net 
+android http网络请求工具类似 Retrofit 
 1. 具体使用如下:
 在xxxApplication中的onCreate时添加
     //config中可以配置http请求的所有拦截，认证操作
