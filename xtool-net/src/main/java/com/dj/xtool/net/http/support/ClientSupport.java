@@ -1,6 +1,8 @@
 package com.dj.xtool.net.http.support;
 
 
+import android.os.Looper;
+
 import com.dj.xtool.net.http.config.HttpConfig;
 import com.dj.xtool.net.http.enums.HttpMethod;
 import com.dj.xtool.net.http.model.ApiInfo;
@@ -26,14 +28,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+
+
 
 
 /**
@@ -86,9 +85,9 @@ public class ClientSupport<S extends ClientSupport> {
                     builder.addNetworkInterceptor(new Interceptor() {
                         @NotNull
                         @Override
-                        public Response intercept(@NotNull Chain chain) throws IOException {
-                            Request request = chain.request();
-                            Request.Builder builder1 = request.newBuilder();
+                        public okhttp3.Response intercept(@NotNull Chain chain) throws IOException {
+                            okhttp3.Request request = chain.request();
+                            okhttp3.Request.Builder builder1 = request.newBuilder();
                             builder1.addHeader("Content-Type", "application/json")
                                     .addHeader("Accept", "application/json");
                             request = builder1.build();
@@ -165,10 +164,10 @@ public class ClientSupport<S extends ClientSupport> {
                                                          Object reqEntity,
                                                          Map<String, String> headers,
                                                          final TypeReference<com.dj.xtool.net.http.model.Response<T>> returnType,
-                                                         final com.dj.xtool.net.http.support.Callback responseCallback
+                                                         final Callback responseCallback
     ) {
 
-        Request.Builder builder = new Request.Builder();
+        okhttp3.Request.Builder builder = new okhttp3.Request.Builder();
         com.dj.xtool.net.http.model.Response<T> result = new com.dj.xtool.net.http.model.Response<>();
         try {
             if (headers != null) {
@@ -185,11 +184,11 @@ public class ClientSupport<S extends ClientSupport> {
                 builder = builder.get();
             } else if (httpMethod == HttpMethod.PUT) {
                 String bodyJson = JsonUtils.toJson(reqEntity);
-                RequestBody body = RequestBody.create(bodyJson, MediaType.parse("application/json"));
+                okhttp3.RequestBody body = okhttp3.RequestBody.create(bodyJson, MediaType.parse("application/json"));
                 builder = builder.put(body);
             } else if (httpMethod == HttpMethod.POST) {
                 String bodyJson = JsonUtils.toJson(reqEntity);
-                RequestBody body = RequestBody.create(bodyJson, MediaType.parse("application/json"));
+                okhttp3.RequestBody body = okhttp3.RequestBody.create(bodyJson, MediaType.parse("application/json"));
                 builder = builder.post(body);
             } else if (httpMethod == HttpMethod.DELETE) {
                 builder = builder.delete();
@@ -200,61 +199,71 @@ public class ClientSupport<S extends ClientSupport> {
 
             //异步请求回调
             if (responseCallback != null) {
-                getHttpClient().newCall(builder.build()).enqueue(new Callback() {
+                getHttpClient().newCall(builder.build()).enqueue(new okhttp3.Callback() {
                     @Override
                     public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        responseCallback.accept(null, e);
+                        Looper.prepare();
+                        try {
+                            responseCallback.accept(null, e);
+                        }finally {
+                            Looper.loop();
+                        }
+
                     }
 
                     @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        if (response == null) {
-
-                            responseCallback.accept(null, new RuntimeException("response is null"));
-                        }
-                        int code = response.code();
-                        String message = response.message();
-                        if (code < 300) {
-                            ResponseBody responseBody = response.body();
-                            if (responseBody != null) {
-                                String resultBody = responseBody.string();
-                                com.dj.xtool.net.http.model.Response<T> result = null;
-                                String errorMsg = "";
-                                try {
-                                    result = JsonUtils.json2GenericObject(resultBody, returnType, null);
-                                } catch (Exception e) {
-                                    errorMsg = e.getMessage();
-                                }
-                                if (StringUtils.isBlank(errorMsg) && result != null) {
-                                    responseCallback.accept(result, null);
-                                } else {
-                                    responseCallback.accept(result, new RuntimeException(errorMsg));
-                                }
+                    public void onResponse(@NotNull Call call, @NotNull okhttp3.Response response) throws IOException {
+                        Looper.prepare();
+                        try {
+                            if (response == null) {
+                                responseCallback.accept(null, new RuntimeException("response is null"));
                             }
-                        } else if (code > 300 && code < 400) {
-                            ResponseBody responseBody = response.body();
-                            if (responseBody != null) {
-                                String resultBody = responseBody.string();
-                                com.dj.xtool.net.http.model.Response<T> result = JsonUtils.json2GenericObject(resultBody, returnType, null);
-                                responseCallback.accept(null, new RuntimeException(result.getMessage()));
-                                return;
-                            }
-                            responseCallback.accept(null, new RuntimeException(message));
-                        } else {
-                            responseCallback.accept(null, new RuntimeException(message));
+                            int code = response.code();
+                            String message = response.message();
+                            if (code < 300) {
+                                okhttp3.ResponseBody responseBody = response.body();
+                                if (responseBody != null) {
+                                    String resultBody = responseBody.string();
+                                    com.dj.xtool.net.http.model.Response<T> result = null;
+                                    String errorMsg = "";
+                                    try {
+                                        result = JsonUtils.json2GenericObject(resultBody, returnType, null);
+                                    } catch (Exception e) {
+                                        errorMsg = e.getMessage();
+                                    }
+                                    if (StringUtils.isBlank(errorMsg) && result != null) {
+                                        responseCallback.accept(result, null);
+                                    } else {
+                                        responseCallback.accept(result, new RuntimeException(errorMsg));
+                                    }
+                                }
+                            } else if (code > 300 && code < 400) {
+                                okhttp3.ResponseBody responseBody = response.body();
+                                if (responseBody != null) {
+                                    String resultBody = responseBody.string();
+                                    com.dj.xtool.net.http.model.Response<T> result = JsonUtils.json2GenericObject(resultBody, returnType, null);
+                                    responseCallback.accept(null, new RuntimeException(result.getMessage()));
+                                    return;
+                                }
+                                responseCallback.accept(null, new RuntimeException(message));
+                            } else {
+                                responseCallback.accept(null, new RuntimeException(message));
 
+                            }
+                        }finally {
+                            Looper.loop();
                         }
                     }
                 });
             } else {
                 //同步请求
-                Response response = getHttpClient().newCall(builder.build()).execute();
+                okhttp3.Response response = getHttpClient().newCall(builder.build()).execute();
                 if (response == null) {
                     throw new RuntimeException("response is null");
                 }
                 int code = response.code();
                 String message = response.message();
-                ResponseBody responseBody = response.body();
+                okhttp3.ResponseBody responseBody = response.body();
                 if (code < 300) {
 
                     if (responseBody != null) {
@@ -319,7 +328,7 @@ public class ClientSupport<S extends ClientSupport> {
      * @param callback
      * @return
      */
-    private static Type getReturnType(com.dj.xtool.net.http.support.Callback callback) {
+    private static Type getReturnType(Callback callback) {
         try {
 
             Type type = callback.getClass().getGenericInterfaces()[0];
@@ -360,11 +369,11 @@ public class ClientSupport<S extends ClientSupport> {
         String fullUrl = apiInfo.buildUrl(pathParams);
         ApiType apiType = new ApiType<>(apiInfo.getReturnActualType());
         Object body = apiInfo.parseRequestBody(args);
-        com.dj.xtool.net.http.support.Callback callback = null;
+       Callback callback = null;
         if (args != null) {
             for (Object obj : args) {
                 if (obj instanceof Callback) {
-                    callback = (com.dj.xtool.net.http.support.Callback) obj;
+                    callback = (Callback) obj;
                     Type returnType = getReturnType(callback);
                     apiInfo.setReturnType(returnType);
                     if (returnType != null) {

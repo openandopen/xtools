@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 // #修改# // 这里是aar的版本号
 version = "1.0.0"
 // #修改# // 组名称，这个相当于依赖的时候 compile 'com.bigkoo:pickerview:1.0.1' “:”号前面的前缀
@@ -13,7 +14,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -37,7 +38,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     implementation 'org.apache.commons:commons-lang3:3.9'
-//    implementation 'org.apache.commons:commons-text:1.8'
     //网络http请求
     implementation 'com.squareup.okhttp3:okhttp:4.2.0'
     implementation deps.gson
@@ -45,16 +45,53 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.9.9'
 
 
-
     //日志框架
     implementation 'com.orhanobut:logger:2.2.0'
 }
 
 
-def siteUrl = 'https://github.com/openandopen/xtools'
-def gitUrl = 'https://github.com/openandopen/xtools.git'
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            //记住一下规则,等会导入时注意,
+            groupId 'com.dj.xtool'//包名
+            artifactId 'xtool-net'
+            version '1.0.0'//版本
+            // Tell maven to prepare the generated "*.aar" file for publishing
+            artifact(sourceJar)
+            artifact("$buildDir/outputs/aar/${project.getName()}-release.aar")
+//同时记录该依赖库所依赖的其他远程依赖
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.compile.allDependencies.each {
+                    if (it.group != null && (it.name != null || "unspecified".equals(it.name)) && it.version != null) {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            //仓库存放在项目根目录
+            url("file://D:/softinstall/mavenlib/repo")
+        }
+    }
+}
+
 
 /*
+def siteUrl = 'https://github.com/openandopen/xtools'
+def gitUrl = 'https://github.com/openandopen/xtools.git'
 install {
     repositories.mavenInstaller {
          pom {

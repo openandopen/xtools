@@ -1,5 +1,6 @@
 package com.dj.xtool.net.http;
 
+
 import com.dj.xtool.net.http.config.HttpConfig;
 import com.dj.xtool.net.http.support.ClientApiFactory;
 
@@ -19,6 +20,7 @@ public class RequestUtil {
      */
     public static void initConfig(HttpConfig config) {
         ClientApiFactory.initHttpConfig(config);
+
     }
 
     /**
