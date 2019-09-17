@@ -1,0 +1,88 @@
+apply plugin: 'com.android.library'
+// #修改# // 这里是aar的版本号
+version = "1.0.0"
+// #修改# // 组名称，这个相当于依赖的时候 compile 'com.bigkoo:pickerview:1.0.1' “:”号前面的前缀
+group = "com.dj.xtool"
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+
+
+    defaultConfig {
+        minSdkVersion 26
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    implementation 'org.apache.commons:commons-lang3:3.9'
+//    implementation 'org.apache.commons:commons-text:1.8'
+    //网络http请求
+    implementation 'com.squareup.okhttp3:okhttp:4.2.0'
+    implementation deps.gson
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.9.9'
+
+
+
+    //日志框架
+    implementation 'com.orhanobut:logger:2.2.0'
+}
+
+
+def siteUrl = 'https://github.com/openandopen/xtools'
+def gitUrl = 'https://github.com/openandopen/xtools.git'
+
+/*
+install {
+    repositories.mavenInstaller {
+         pom {
+            project {
+                packaging 'aar'
+                name 'xtool For Android'                                   // #修改# // 标题
+                url siteUrl
+                // Set your license
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'hei'
+                        name 'gong'
+                        email 'zuiwoxing@qq.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+*/
