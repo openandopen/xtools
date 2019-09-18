@@ -1,4 +1,4 @@
-
+group = 'com.dj.xtool'
 buildscript {
     apply from: './versions.gradle'
     /*   repositories {

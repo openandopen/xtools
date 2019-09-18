@@ -5,7 +5,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 // #修改# // 这里是aar的版本号
 version = "1.0.0"
 // #修改# // 组名称，这个相当于依赖的时候 compile 'com.bigkoo:pickerview:1.0.1' “:”号前面的前缀
-group = "com.dj.xtool"
+group = 'com.dj.xtool'
 
 android {
     compileSdkVersion 28

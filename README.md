@@ -1,6 +1,9 @@
 ### xtool 提供android 环境下的工具类
 
 ````
+ 在使用的项目中引入以下包
+ implementation 'com.github.openandopen:xtools:1.0.0'
+ 
 xtool-net 
 android http网络请求工具类似 Retrofit 
 1. 具体使用如下:
