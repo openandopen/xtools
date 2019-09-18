@@ -1,4 +1,5 @@
 ### xtool 提供android 环境下的工具类
+
 ````
 xtool-net 
 android http网络请求工具类似 Retrofit 
@@ -43,7 +44,7 @@ public interface UserService {
 ````
 3. 在xxxActivity中开始调用
  
-  CommonService commonService = RequestUtil.wrapGet(CommonService.class);
+        CommonService commonService = RequestUtil.wrapGet(CommonService.class);
         commonService.asyncSendMessage(Long.valueOf(mobileStr.trim()), "login",
                 new Callback<Response<Boolean>>() {
                     @Override
@@ -61,23 +62,24 @@ public interface UserService {
                     }
                 });
                 
-                  commonService.login(userInfo, new Callback<Response<UserInfo>>() {
-                            @Override
-                            public void accept(Response<UserInfo> result, Exception e) {
-                                 if (e != null) {
-                                    XToastUtils.error("登录失败:" + e.getMessage(), 4000);
+              commonService.login(userInfo, 
+                      new Callback<Response<UserInfo>>() {
+                        @Override
+                        public void accept(Response<UserInfo> result, Exception e) {
+                             if (e != null) {
+                                XToastUtils.error("登录失败:" + e.getMessage(), 4000);
+                            } else {
+                                UserInfo userInfo1 = result.getResult();
+                                if(userInfo1 != null &&  StringUtils.isNotBlank(userInfo1.getToken())) {
+                                  System.out.println(JsonUtils.toJson(userInfo1,true));
+                                    ActivityUtils.startActivity(IndexActivity.class);
                                 } else {
-                                    UserInfo userInfo1 = result.getResult();
-                                    if(userInfo1 != null &&  StringUtils.isNotBlank(userInfo1.getToken())) {
-                                      System.out.println(JsonUtils.toJson(userInfo1,true));
-                                        ActivityUtils.startActivity(IndexActivity.class);
-                                    } else {
-                                        XToastUtils.error("登录失败", 4000);
-                                    }
-                                  
-                                 }
-                            }
-                        });
+                                    XToastUtils.error("登录失败", 4000);
+                                }
+                              
+                             }
+                        }
+                       });
 
 ````
 
